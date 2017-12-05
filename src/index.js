@@ -28,3 +28,32 @@ const webAuth = new auth0.WebAuth({
   scope: process.env.AUTH0_SCOPE,
   redirectUri: window.location.href
 })
+
+webAuth.parseHash({ hash: window.location.hash }, handleAuthResult)
+
+function handleAuthResult (err, authResult) {
+  if (err) {
+    return console.error(err)
+  }
+  if (authResult) {
+    const token = authResult.accessToken
+    webAuth.client.userInfo(token, handeProfileData.bind(null, token))
+    window.location.hash = ''
+  }
+}
+
+function handeProfileData (token, err, profile) {
+  if (err) {
+    console.log(err)
+  } else {
+    const data = { profile: profile, token: token }
+    console.info(profile)
+    setProfileData(data)
+    // Send data to Elm
+  }
+}
+
+function setProfileData ({ profile, token }) {
+  localStorage.setItem('profile', JSON.stringify(profile))
+  localStorage.setItem('token', token)
+}
