@@ -47,7 +47,7 @@ function handeProfileData (token, err, profile) {
     const data = { profile: profile, token: token }
     console.info(profile)
     setProfileData(data)
-    // Send data to Elm
+    app.ports.fromJS.send({ tag: 'NewProfileData', data })
   }
 }
 

@@ -1,9 +1,11 @@
 port module Ports exposing (..)
 
 import Json.Encode
+import Json.Decode
+import Json.Decode.Pipeline exposing (decode, required, requiredAt, optional, optionalAt, hardcoded)
 
 
-sendToJS : Msg -> Cmd msg
+sendToJS : MsgToJS -> Cmd msg
 sendToJS msg =
     case msg of
         ShowLock ->
@@ -13,19 +15,57 @@ sendToJS msg =
             toJS { tag = "LogOut", data = Json.Encode.null }
 
 
+getFromJS : (MsgFromJS -> msg) -> (String -> msg) -> Sub msg
+getFromJS tagger onError =
+    fromJS
+        (\msgFromJS ->
+            case msgFromJS.tag of
+                "NewProfileData" ->
+                    case Json.Decode.decodeValue (profileDataDecoder) msgFromJS.data of
+                        Ok profileData ->
+                            tagger <| NewProfileData profileData
 
--- getFromJS : (Data -> msg) (String -> msg) -> Sub msg
--- getFromJS tagger onError =
--- For implentation see: https://github.com/splodingsocks/a-very-im-port-ant-topic/blob/master/example/src/OutsideInfo.elm
---     fromJS
---         (\data ->
---             case data.tag of
---         )
+                        Err e ->
+                            onError e
+
+                _ ->
+                    onError <| "Unexpected message from JS: " ++ toString msgFromJS
+        )
 
 
-type Msg
+profileDataDecoder : Json.Decode.Decoder ProfileData
+profileDataDecoder =
+    decode ProfileData
+        |> required "profile" userProfileDecoder
+        |> required "token" Json.Decode.string
+
+
+userProfileDecoder : Json.Decode.Decoder UserProfile
+userProfileDecoder =
+    decode UserProfile
+        |> required "email" Json.Decode.string
+        |> optional "email_verified" Json.Decode.bool False
+
+
+type alias ProfileData =
+    { profile : UserProfile
+    , token : String
+    }
+
+
+type alias UserProfile =
+    { email : String
+    , email_verified : Bool
+    }
+
+
+type MsgToJS
     = ShowLock
     | LogOut
+
+
+type MsgFromJS
+    = NewProfileData ProfileData
 
 
 type alias Data =
