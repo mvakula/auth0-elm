@@ -12,10 +12,8 @@ app.ports.toJS.subscribe(msg => {
       break
 
     case 'LogOut':
-      localStorage.removeItem('profile')
-      localStorage.removeItem('token')
+      removeProfileData()
       break
-
     default:
       break
   }
@@ -56,4 +54,9 @@ function handeProfileData (token, err, profile) {
 function setProfileData ({ profile, token }) {
   localStorage.setItem('profile', JSON.stringify(profile))
   localStorage.setItem('token', token)
+}
+
+function removeProfileData () {
+  localStorage.removeItem('profile')
+  localStorage.removeItem('token')
 }
