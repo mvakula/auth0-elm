@@ -58,7 +58,7 @@ update msg model =
             ( model, (Ports.sendToJS Ports.ShowLock) )
 
         LogOut ->
-            ( model, Cmd.none )
+            ( { model | profileData = Nothing }, (Ports.sendToJS Ports.LogOut) )
 
         FromJS msgFromJS ->
             case msgFromJS of
@@ -81,9 +81,17 @@ logErr err model =
 
 view : Model -> Html Msg
 view model =
-    div [ onClick ShowLock ]
-        [ div [] [ text "Log in" ]
-        ]
+    div [] [ showAuth model ]
+
+
+showAuth : Model -> Html Msg
+showAuth model =
+    case model.profileData of
+        Just profileData ->
+            div [ onClick LogOut ] [ text "Log out" ]
+
+        Nothing ->
+            div [ onClick ShowLock ] [ text "Log in" ]
 
 
 
