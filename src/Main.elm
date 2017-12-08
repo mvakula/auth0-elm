@@ -88,7 +88,10 @@ showAuth : Model -> Html Msg
 showAuth model =
     case model.profileData of
         Just profileData ->
-            div [ onClick LogOut ] [ text "Log out" ]
+            div []
+                [ div [] [ text ("Hello " ++ profileData.profile.email) ]
+                , div [ onClick LogOut ] [ text ("Log out") ]
+                ]
 
         Nothing ->
             div [ onClick ShowLock ] [ text "Log in" ]
