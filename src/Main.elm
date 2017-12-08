@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Html exposing (Html, text, div, img)
 import Html.Events exposing (onClick)
+import Json.Decode
 import Ports
 
 
@@ -9,26 +10,27 @@ import Ports
 
 
 type alias Model =
-    { profileData : Ports.ProfileData }
+    { profileData : Maybe Ports.ProfileData }
 
 
-initProfileData : Ports.ProfileData
-initProfileData =
-    { profile = initUserProfile
-    , token = ""
-    }
+init : Flags -> ( Model, Cmd Msg )
+init initialUser =
+    case initialUser of
+        Just profileData ->
+            ( { profileData = mapInitialUser (profileData) }, Cmd.none )
+
+        Nothing ->
+            ( { profileData = Nothing }, Cmd.none )
 
 
-initUserProfile : Ports.UserProfile
-initUserProfile =
-    { email = ""
-    , email_verified = False
-    }
+mapInitialUser : Json.Decode.Value -> Maybe Ports.ProfileData
+mapInitialUser initialUser =
+    case Ports.decodeProfileData initialUser of
+        Ok profileData ->
+            Just profileData
 
-
-init : ( Model, Cmd Msg )
-init =
-    ( { profileData = initProfileData }, Cmd.none )
+        Err e ->
+            Nothing
 
 
 
@@ -97,9 +99,13 @@ subscriptions model =
 ---- PROGRAM ----
 
 
-main : Program Never Model Msg
+type alias Flags =
+    Maybe Json.Decode.Value
+
+
+main : Program Flags Model Msg
 main =
-    Html.program
+    Html.programWithFlags
         { view = view
         , init = init
         , update = update

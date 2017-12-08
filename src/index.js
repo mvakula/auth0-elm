@@ -2,8 +2,14 @@ import './main.css'
 import auth0 from 'auth0-js'
 import { Main } from './Main.elm'
 
+const storedProfile = localStorage.getItem('profile')
+const storedToken = localStorage.getItem('token')
+const authData = storedProfile && storedToken
+  ? { profile: JSON.parse(storedProfile), token: storedToken }
+  : null
+
 const node = document.getElementById('root')
-const app = Main.embed(node)
+const app = Main.embed(node, authData)
 
 app.ports.toJS.subscribe(msg => {
   switch (msg.tag) {

@@ -21,16 +21,26 @@ getFromJS tagger onError =
         (\msgFromJS ->
             case msgFromJS.tag of
                 "NewProfileData" ->
-                    case Json.Decode.decodeValue (profileDataDecoder) msgFromJS.data of
-                        Ok profileData ->
-                            tagger <| NewProfileData profileData
-
-                        Err e ->
-                            onError e
+                    mapNewProfileData msgFromJS.data tagger onError
 
                 _ ->
                     onError <| "Unexpected message from JS: " ++ toString msgFromJS
         )
+
+
+mapNewProfileData : Json.Decode.Value -> (MsgFromJS -> msg) -> (String -> msg) -> msg
+mapNewProfileData data tagger onError =
+    case decodeProfileData data of
+        Ok profileData ->
+            tagger <| NewProfileData (Just profileData)
+
+        Err e ->
+            onError e
+
+
+decodeProfileData : Json.Decode.Value -> Result String ProfileData
+decodeProfileData data =
+    Json.Decode.decodeValue profileDataDecoder data
 
 
 profileDataDecoder : Json.Decode.Decoder ProfileData
@@ -65,7 +75,7 @@ type MsgToJS
 
 
 type MsgFromJS
-    = NewProfileData ProfileData
+    = NewProfileData (Maybe ProfileData)
 
 
 type alias Data =
