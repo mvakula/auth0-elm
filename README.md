@@ -11,3 +11,20 @@ elm-package install
 ```sh
 npm i
 ```
+
+## Setup
+
+Set env variables
+
+```sh
+export AUTH0_DOMAIN=domain
+export AUTH0_CLIENT_ID=clientId
+export AUTH0_RESPONSE_TYPE="token"
+export AUTH0_SCOPE="email"
+```
+
+## Run
+
+```sh
+npm start
+```
